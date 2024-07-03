@@ -2,32 +2,24 @@
 
 import Link from "next/link";
 import {useState} from "react";
-import {useRouter} from "next/navigation";
-import {signIn} from "next-auth/react";
+import {AlertError} from "@/dialogs/AlertError";
+import {SignUpApi} from "@/app/api/auth/signup/SignUpApi";
+import {AlertSuccess} from "@/dialogs/AlertSuccess";
 
-export default function SignIpPage() {
+export default function SignUpPage() {
+    const [name, setName] = useState("");
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const router = useRouter();
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        try {
-            const result = await signIn('credentials', {
-                redirect: false,
-                email,
-                password,
-            })
-
-            if (result.error) {
-                console.error(result.error)
-            } else {
-                alert('login successful');
-                router.push('/pages/dashboard')
-            }
-        } catch (error) {
-            console.log('error', error)
+        if (confirmPassword !== password) {
+            return AlertError('เกิดข้อผิดพลาด','รหัสผ่านไม่ตรงกัน');
         }
+        await SignUpApi(name, email, password, (data, status) => {
+            status === 200 ? AlertSuccess('สำเร็จ', data) : AlertError('เกิดข้อผิดพลาด', data);
+        });
     }
     return (
         <>
@@ -43,9 +35,23 @@ export default function SignIpPage() {
                         className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                             <h1 className="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                                เข้าสู่ระบบ
+                                ลงทะเบียน
                             </h1>
                             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+                                <div>
+                                    <label htmlFor="email"
+                                           className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        ชื่อ - นามสกุล
+                                    </label>
+                                    <input
+                                        id="name"
+                                        type="name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        required={true}
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        placeholder="ชื่อ - นามสกุล"/>
+                                </div>
                                 <div>
                                     <label htmlFor="email"
                                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -74,6 +80,20 @@ export default function SignIpPage() {
                                            className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     />
                                 </div>
+                                <div>
+                                    <label htmlFor={'confirmPassword'}
+                                           className={'block mb-2 text-sm font-medium text-gray-900 dark:text-white'}>
+                                        ยืนยันรหัสผ่าน
+                                    </label>
+                                    <input name="confirmPassword" placeholder="••••••••"
+                                           id="confirmPassword"
+                                           type="password"
+                                           value={confirmPassword}
+                                           onChange={(e) => setConfirmPassword(e.target.value)}
+                                           required
+                                           className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    />
+                                </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-start">
                                         <div className="flex items-center h-5">
@@ -96,17 +116,10 @@ export default function SignIpPage() {
                                         className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                     เข้าสู่ระบบ
                                 </button>
-                                <button type={'button'} onClick={() => signIn('google')}
-                                        className="w-full items-center justify-center px-4 py-2 border flex gap-2 border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150">
-                                    <img className="w-6 h-6" src="https://www.svgrepo.com/show/475656/google-color.svg"
-                                         loading="lazy" alt="google logo"/>
-                                    <span>เข้าสู่ระบบด้วย Google</span>
-                                </button>
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                    ยังไม่มีบัญชี?
-                                    <Link href="signup"
-                                       className="font-medium text-blue-400 text-primary-600 hover:underline dark:text-blue-500">
-                                        สมัคร
+                                    <Link href="/"
+                                          className="font-medium text-blue-400 text-primary-600 hover:underline dark:text-blue-500">
+                                        ไปหน้าเข้าสู่ระบบ
                                     </Link>
                                 </p>
                             </form>

@@ -15,8 +15,8 @@ export async function POST(request) {
                 name,
             },
         })
-        return Response.json({ message: 'User created', user })
+        return Response.json({ message: 'ลงทะเบียนสำเร็จ', user })
     } catch (error) {
-        return Response.json({ error: 'User could not be created' })
+        return Response.json({ message: 'ลงทะเบียนไม่สำเร็จ',error : error },{status : 500})
     }
 }
